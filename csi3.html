@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>INFOVITZ 2K25 – Technical Symposium</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800;900&family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      color: #fff;
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Anime-style floating sakura petals */
+    .sakura-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .sakura {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background: linear-gradient(45deg, #ff9a9e, #fecfef, #fecfef);
+      border-radius: 50% 0 50% 0;
+      animation: sakuraFall 8s infinite linear;
+      opacity: 0.8;
+    }
+
+    @keyframes sakuraFall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* 3D Background Canvas */
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    /* Anime-style navigation */
+    .nav-bar {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1));
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50px;
+      padding: 15px 30px;
+      z-index: 1000;
+      display: flex;
+      gap: 25px;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-bar:hover {
+      transform: translateX(-50%) translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-item {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: 25px;
+      transition: all 0.3s ease;
+      font-size: 0.9em;
+      background: linear-gradient(135deg, transparent, transparent);
+    }
+
+    .nav-item:hover {
+      background: linear-gradient(135deg, #ff9a9e, #fecfef);
+      transform: scale(1.1) translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
+    }
+
+    /* Main content wrapper */
+    .content-wrapper {
+      position: relative;
+      z-index: 2;
+      padding-top: 100px;
+    }
+
+    /* Anime-style hero section */
+    header {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+      backdrop-filter: blur(20px);
+      padding: 80px 20px 60px;
+      text-align: center;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 30px;
+      margin: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      animation: shimmer 3s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes shimmer {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #ff9a9e, #fecfef);
+      color: #fff;
+      padding: 12px 25px;
+      border-radius: 25px;
+      font-size: 0.9em;
+      font-weight: 700;
+      margin-bottom: 25px;
+      animation: bounce 2s infinite;
+      box-shadow: 0 5px 20px rgba(255, 154, 158, 0.4);
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+
+    header h1 {
+      font-family: 'Comfortaa', cursive;
+      font-size: 4em;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff9a9e, #fecfef, #a8edea, #fed6e3);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 300% 300%;
+      animation: textGradient 4s ease infinite, float 3s ease-in-out infinite;
+      margin: 20px 0;
+      text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+    }
+
+    @keyframes textGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    header h2 {
+      font-family: 'Comfortaa', cursive;
+      font-size: 3.2em;
+      font-weight: 700;
+      color: #fff;
+      margin: 30px 0;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+      animation: pulse 2s infinite, glow 3s ease-in-out infinite alternate;
+      position: relative;
+    }
+
+    header h2::before {
+      content: '🌸';
+      position: absolute;
+      left: -80px;
+      animation: rotate 4s linear infinite;
+      font-size: 0.8em;
+    }
+
+    header h2::after {
+      content: '🌸';
+      position: absolute;
+      right: -80px;
+      animation: rotate 4s linear infinite reverse;
+      font-size: 0.8em;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.2); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+      to { text-shadow: 0 0 30px rgba(255, 255, 255, 1), 0 0 40px rgba(255, 154, 158, 0.8); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    header p {
+      font-size: 1.4em;
+      margin: 15px 0;
+      opacity: 0.95;
+      font-weight: 400;
+    }
+
+    /* Anime-style countdown timer */
+    .countdown-container {
+      max-width: 1200px;
+      margin: 60px auto;
+      padding: 50px 30px;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1));
+      backdrop-filter: blur(20px);
+      border-radius: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+      animation: containerFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes containerFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .countdown-container::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      background: linear-gradient(45deg, #ff9a9e, #fecfef, #a8edea, #fed6e3, #ff9a9e);
+      border-radius: 40px;
+      z-index: -1;
+      animation: borderRotate 8s linear infinite;
+    }
+
+    @keyframes borderRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .countdown-title {
+      font-family: 'Comfortaa', cursive;
+      font-size: 3.5em;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff9a9e, #fecfef);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 40px;
+      animation: titleBounce 3s ease-in-out infinite;
+    }
+
+    @keyframes titleBounce {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.1) rotate(2deg); }
+    }
+
+    .countdown-subtitle {
+      font-size: 1.3em;
+      color: #fff;
+      margin-bottom: 40px;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+
+    .countdown-display {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 30px;
+      margin: 50px 0;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .time-unit {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+      backdrop-filter: blur(15px);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: 25px;
+      padding: 35px 25px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      animation: unitFloat 4s ease-in-out infinite;
+    }
+
+    .time-unit:nth-child(1) { animation-delay: 0s; }
+    .time-unit:nth-child(2) { animation-delay: 0.5s; }
+    .time-unit:nth-child(3) { animation-delay: 1s; }
+    .time-unit:nth-child(4) { animation-delay: 1.5s; }
+
+    @keyframes unitFloat {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-8px) scale(1.02); }
+    }
+
+    .time-unit:hover {
+      transform: translateY(-15px) scale(1.1);
+      box-shadow: 0 20px 40px rgba(255, 154, 158, 0.4);
+      background: linear-gradient(135deg, rgba(255, 154, 158, 0.4), rgba(254, 207, 239, 0.3));
+    }
+
+    .time-unit::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: sweep 3s infinite;
+    }
+
+    @keyframes sweep {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .time-number {
+      font-family: 'Comfortaa', cursive;
+      font-size: 4em;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ff9a9e, #fecfef);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+      position: relative;
+      z-index: 1;
+      animation: numberPulse 2s infinite alternate;
+    }
+
+    @keyframes numberPulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
+    }
+
+    .time-label {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.1em;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 15px;
+      position: relative;
+      z-index: 1;
+      font-weight: 600;
+    }
+
+    /* Anime-style sections */
+    section {
+      max-width: 1000px;
+      margin: 50px auto;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1));
+      backdrop-filter: blur(20px);
+      padding: 40px;
+      border-radius: 30px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    section:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+      background: linear-gradient(135deg, rgba(255, 154, 158, 0.3), rgba(254, 207, 239, 0.2));
+    }
+
+    section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #ff9a9e, #fecfef, #a8edea, #fed6e3);
+      animation: topGlow 3s infinite;
+    }
+
+    @keyframes topGlow {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    h2 {
+      font-family: 'Comfortaa', cursive;
+      font-size: 2.5em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ff9a9e, #fecfef);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 30px;
+      position: relative;
+      animation: headingFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes headingFloat {
+      0%, 100% { transform: translateX(0px); }
+      50% { transform: translateX(5px); }
+    }
+
+    /* Anime-style lists */
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    ul li {
+      margin: 25px 0;
+      padding: 25px 30px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+      border-radius: 20px;
+      border-left: 5px solid #ff9a9e;
+      position: relative;
+      transition: all 0.4s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    ul li:hover {
+      background: linear-gradient(135deg, rgba(255, 154, 158, 0.3), rgba(254, 207, 239, 0.2));
+      transform: translateX(15px) scale(1.02);
+      box-shadow: 0 10px 30px rgba(255, 154, 158, 0.3);
+    }
+
+    ul li::before {
+      content: "✨";
+      position: absolute;
+      left: -25px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.8em;
+      animation: sparkle 2s ease-in-out infinite;
+      background: linear-gradient(135deg, #ff9a9e, #fecfef);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
+    }
+
+    @keyframes sparkle {
+      0%, 100% { transform: translateY(-50%) scale(1) rotate(0deg); }
+      50% { transform: translateY(-50%) scale(1.2) rotate(180deg); }
+    }
+
+    /* Anime-style button */
+    .register-button {
+      display: inline-block;
+      padding: 20px 50px;
+      background: linear-gradient(135deg, #ff9a9e, #fecfef, #a8edea);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 800;
+      font-family: 'Comfortaa', cursive;
+      border-radius: 50px;
+      margin: 40px auto;
+      transition: all 0.4s ease;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 15px 35px rgba(255, 154, 158, 0.4);
+      position: relative;
+      overflow: hidden;
+      font-size: 1.2em;
+      background-size: 300% 300%;
+      animation: buttonGradient 4s ease infinite, buttonFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes buttonGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes buttonFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .register-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.6s;
+    }
+
+    .register-button:hover::before {
+      left: 100%;
+    }
+
+    .register-button:hover {
+      transform: translateY(-8px) scale(1.1);
+      box-shadow: 0 25px 50px rgba(255, 154, 158, 0.6);
+    }
+
+    .register-section {
+      text-align: center;
+      padding: 60px 40px;
+    }
+
+    /* Anime-style footer */
+    footer {
+      text-align: center;
+      padding: 50px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+      backdrop-filter: blur(20px);
+      border-top: 3px solid rgba(255, 255, 255, 0.3);
+      margin-top: 60px;
+      position: relative;
+    }
+
+    footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #ff9a9e, #fecfef, #a8edea, #fed6e3);
+      animation: footerGlow 4s infinite;
+    }
+
+    @keyframes footerGlow {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .nav-bar { 
+        flex-direction: column; 
+        gap: 15px; 
+        padding: 25px;
+        top: 10px;
+      }
+      
+      header h1 { font-size: 3em; }
+      header h2 { font-size: 2.5em; }
+      
+      .countdown-display { 
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px; 
+      }
+      
+      .time-unit { 
+        padding: 25px 20px; 
+      }
+      
+      .time-number { font-size: 3em; }
+      .countdown-title { font-size: 2.5em; }
+      
+      section { 
+        margin: 20px; 
+        padding: 30px 25px; 
+      }
+      
+      .content-wrapper { padding-top: 140px; }
+    }
+
+    @media (max-width: 480px) {
+      .countdown-display { 
+        grid-template-columns: 1fr 1fr;
+        gap: 15px; 
+      }
+      
+      .time-number { font-size: 2.5em; }
+      header h1 { font-size: 2.5em; }
+      header h2 { font-size: 2em; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Anime-style floating sakura -->
+<div class="sakura-container" id="sakuraContainer"></div>
+
+<!-- Navigation Bar -->
+<nav class="nav-bar">
+  <a href="#home" class="nav-item">🏠 Home</a>
+  <a href="#countdown" class="nav-item">⏰ Countdown</a>
+  <a href="#events" class="nav-item">🎯 Events</a>
+  <a href="#team" class="nav-item">👥 Team</a>
+  <a href="#register" class="nav-item">📝 Register</a>
+</nav>
+
+<!-- 3D Background Canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<div class="content-wrapper">
+  <header id="home">
+    <div class="hero-badge">🌟 NATIONAL LEVEL SYMPOSIUM 🌟</div>
+    <h1>C.S.I. INSTITUTE OF TECHNOLOGY</h1>
+    <h2>INFOVITZ 2K25</h2>
+    <p>A National Level Technical Symposium Conducted by</p>
+    <p><strong>Department of Information Technology</strong></p>
+  </header>
+
+  <!-- Anime-style Countdown Timer -->
+  <div class="countdown-container" id="countdown">
+    <h2 class="countdown-title">🚀 EVENT COUNTDOWN 🚀</h2>
+    <p class="countdown-subtitle">✨ Get ready for the ultimate tech adventure! ✨</p>
+    <div class="countdown-display" id="countdownDisplay">
+      <div class="time-unit">
+        <span class="time-number" id="days">00</span>
+        <span class="time-label">Days</span>
+      </div>
+      <div class="time-unit">
+        <span class="time-number" id="hours">00</span>
+        <span class="time-label">Hours</span>
+      </div>
+      <div class="time-unit">
+        <span class="time-number" id="minutes">00</span>
+        <span class="time-label">Minutes</span>
+      </div>
+      <div class="time-unit">
+        <span class="time-number" id="seconds">00</span>
+        <span class="time-label">Seconds</span>
+      </div>
+    </div>
+    <p style="font-family: 'Comfortaa', cursive; font-size: 1.4em; color: #fff; margin-top: 30px;">
+      📅 October 10, 2025 • ⏰ 9:00 AM
+    </p>
+  </div>
+
+  <section>
+    <h2>📅 Event Details</h2>
+    <p><strong>📍 Date:</strong> October 10, 2025</p>
+    <p><strong>🏛️ Venue:</strong> Adv. Dharmaraj Auditorium</p>
+    <p><strong>💰 Registration Fee:</strong> ₹200 (Includes lunch)</p>
+  </section>
+
+  <section id="events">
+    <h2>🔧 Technical Events</h2>
+    <ul>
+      <li><strong>TechTalks:</strong> Share your research and ideas with experts and industry leaders! 🎤</li>
+      <li><strong>BugHunt:</strong> An intensive debugging challenge using advanced programming codes! 🐛</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🎭 Non-Technical Events</h2>
+    <ul>
+      <li><strong>Dot2Dot:</strong> Mind-bending puzzle-solving with creative twists! 🧩</li>
+      <li><strong>StepSync:</strong> Energetic group dancing competition! 💃</li>
+      <li><strong>KvizStorm:</strong> Ultimate knowledge testing championship! 🧠</li>
+    </ul>
+  </section>
+
+  <section id="team">
+    <h2>👥 Head of the Department</h2>
+    <p><strong>Dr. K. P. Ajitha Gladis</strong> 🌟</p>
+  </section>
+
+  <section>
+    <h2>👥 Staff Coordinators</h2>
+    <ul>
+      <li><strong>Mrs. S. Asha Shibani</strong> ✨</li>
+      <li><strong>Mrs. V. Richi</strong> ✨</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>👥 Student Coordinators</h2>
+    <ul>
+      <li><strong>J. P. Jeniba Prince</strong> 🌸</li>
+      <li><strong>J. Jebin Wilson</strong> 🌸</li>
+    </ul>
+  </section>
+
+  <section class="register-section" id="register">
+    <a class="register-button" href="https://docs.google.com/forms/d/e/1FAIpQLSc8M1A7vo_9v8BZqyQpgBpse92ByaI7ibertbg7rnRLxSG5pw/viewform?usp=sharing" target="_blank" rel="noopener noreferrer">🚀 Register Now! 🚀</a>
+  </section>
+
+  <footer>
+    <p>© 2025 INFOVITZ 2K25 | C.S.I. Institute of Technology</p>
+    <p style="margin-top: 15px; opacity: 0.8;">✨ Powered by Dreams & Technology ✨</p>
+  </footer>
+</div>
+
+<script>
+// Three.js Anime-style 3D Background
+let scene, camera, renderer, particles;
+
+function init3DBackground() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  // Anime-style particle system
+  const particleCount = 800;
+  const positions = new Float32Array(particleCount * 3);
+  const colors = new Float32Array(particleCount * 3);
+  const sizes = new Float32Array(particleCount);
+
+  for (let i = 0; i < particleCount * 3; i += 3) {
+    positions[i] = (Math.random() - 0.5) * 2000;
+    positions[i + 1] = (Math.random() - 0.5) * 2000;
+    positions[i + 2] = (Math.random() - 0.5) * 2000;
+
+    // Anime-style pastel colors
+    const colorChoice = Math.random();
+    if (colorChoice < 0.33) {
+      colors[i] = 1; colors[i + 1] = 0.6; colors[i + 2] = 0.6; // Pink
+    } else if (colorChoice < 0.66) {
+      colors[i] = 0.8; colors[i + 1] = 0.9; colors[i + 2] = 1; // Light blue
+    } else {
+      colors[i] = 1; colors[i + 1] = 1; colors[i + 2] = 0.8; // Light yellow
+    }
+    
+    sizes[i / 3] = Math.random() * 8 + 2;
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+  const material = new THREE.PointsMaterial({
+    size: 6,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.7,
+    sizeAttenuation: true
+  });
+
+  particles = new THREE.Points(geometry, material);
+  scene.add(particles);
+
+  camera.position.z = 1000;
+}
+
+function animate3D() {
+  requestAnimationFrame(animate3D);
+  
+  particles.rotation.x += 0.0003;
+  particles.rotation.y += 0.0005;
+  
+  renderer.render(scene, camera);
+}
+
+// Countdown Timer
+function updateCountdown() {
+  const eventDate = new Date('October 10, 2025 09:00:00').getTime();
+  const now = new Date().getTime();
+  const distance = eventDate - now;
+
+  if (distance > 0) {
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById('days').textContent = days.toString().padStart(2, '0');
+    document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+    document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+    document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+  } else {
+    document.getElementById('countdownDisplay').innerHTML = '<div class="time-unit" style="grid-column: 1/-1;"><span class="time-number">🎉 EVENT STARTED! 🎉</span></div>';
+  }
+}
+
+// Create anime-style sakura petals
+function createSakura() {
+  const sakuraContainer = document.getElementById('sakuraContainer');
+  
+  for (let i = 0; i < 30; i++) {
+    const sakura = document.createElement('div');
+    sakura.className = 'sakura';
+    sakura.style.left = Math.random() * 100 + '%';
+    sakura.style.animationDelay = Math.random() * 8 + 's';
+    sakura.style.animationDuration = (Math.random() * 4 + 6) + 's';
+    
+    // Random sizes
+    const size = Math.random() * 10 + 10;
+    sakura.style.width = size + 'px';
+    sakura.style.height = size + 'px';
+    
+    sakuraContainer.appendChild(sakura);
+  }
+}
+
+// Smooth scrolling for navigation
+function setupSmoothScrolling() {
+  document.querySelectorAll('.nav-item').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = link.getAttribute('href').substring(1);
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+}
+
+// Handle window resize
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// Initialize everything
+window.addEventListener('load', () => {
+  init3DBackground();
+  animate3D();
+  createSakura();
+  updateCountdown();
+  setupSmoothScrolling();
+  setInterval(updateCountdown, 1000);
+});
+
+window.addEventListener('resize', onWindowResize);
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98229dece1220bbe',t:'MTc1ODM4NDg3Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

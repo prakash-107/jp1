@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>INFOVITZ 2K25 – A National Level Technical Symposium</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #00ffff;
+      --secondary-color: #ff00ff;
+      --background-color: #000;
+      --text-color: #f0f0f0;
+      --container-bg: rgba(15, 32, 39, 0.7);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--background-color);
+      color: var(--text-color);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Preloader */
+    .preloader {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: #000;
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 20px;
+        transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+    .loader {
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        border-left-color: var(--primary-color);
+        border-radius: 50%;
+        width: 50px; height: 50px;
+        animation: spin 1s linear infinite;
+    }
+    .preloader p { font-family: 'Orbitron', monospace; color: var(--primary-color); letter-spacing: 2px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .preloader.hidden { opacity: 0; visibility: hidden; }
+
+    /* 3D Background & Scanlines */
+    #three-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -2;
+    }
+    .scanline-overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: linear-gradient(rgba(0,0,0,0) 50%, rgba(0,0,0,0.4) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
+        background-size: 100% 3px, 4px 100%;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .content-wrapper { position: relative; z-index: 1; }
+
+    /* Hero Section */
+    header {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 0 20px;
+      background: radial-gradient(circle, rgba(15, 32, 39, 0.5) 0%, rgba(15, 32, 39, 0.8) 70%, #000 100%);
+    }
+    header h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #fff;
+      text-shadow: 0 0 10px #fff, 0 0 20px var(--primary-color);
+    }
+    header h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      margin: 0;
+      position: relative;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--primary-color));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientShift 8s ease infinite;
+    }
+    .typewriter-cursor {
+        display: inline-block;
+        width: 3px;
+        height: clamp(2rem, 6vw, 3.8rem);
+        background-color: var(--primary-color);
+        animation: blink 0.7s infinite;
+        vertical-align: bottom;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    @keyframes gradientShift { 0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;} }
+    header p { font-size: clamp(1rem, 2vw, 1.2rem); opacity: 0.9; margin-top: 20px; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+    /* Countdown */
+    .countdown-timer {
+      text-align: center;
+      margin: 60px 0;
+      background: rgba(255,255,255,0.05);
+      padding: 40px 20px;
+      border-radius: 20px;
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0,255,255,0.3);
+      box-shadow: 0 0 35px rgba(0,255,255,0.2);
+    }
+    .countdown-display { display: flex; justify-content: center; gap: clamp(15px, 4vw, 30px); flex-wrap: wrap; margin-top: 20px; }
+    .countdown-item { display: flex; flex-direction: column; align-items: center; }
+    .countdown-number {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      color: var(--primary-color);
+      background: rgba(0,0,0,0.7);
+      padding: 15px 25px;
+      border-radius: 15px;
+      min-width: 120px;
+      box-shadow: inset 0 0 15px rgba(0,255,255,0.5), 0 0 20px rgba(0,255,255,0.3);
+      animation: pulse 2s infinite alternate;
+      transition: transform 0.3s ease;
+    }
+    @keyframes pulse { from{transform:scale(1);} to{transform:scale(1.05);} }
+    .countdown-label { margin-top: 15px; font-size: 0.9em; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.7); }
+
+    /* Section Grid with Glassmorphism & 3D Tilt */
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+      margin: 40px auto;
+      max-width: 1200px;
+      padding: 0 20px;
+    }
+    .section {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(15px);
+      padding: 30px;
+      border-radius: 15px;
+      border: 1px solid rgba(0,255,255,0.3);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 40px rgba(0,255,255,0.1);
+      transform-style: preserve-3d;
+      transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .section:hover {
+        box-shadow: 0 15px 50px rgba(0,0,0,0.5), 0 0 60px rgba(0,255,255,0.3);
+    }
+    .section h2 {
+      font-family: 'Orbitron', monospace;
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+      transform: translateZ(20px);
+    }
+    .section h2 i { margin-right: 10px; }
+    .section p, .section div { transform: translateZ(10px); }
+
+    .event-card, .coordinator-card, .schedule-item {
+      background: rgba(0,255,255,0.08);
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border-left: 3px solid var(--primary-color);
+      transition: 0.4s ease;
+      transform: translateZ(15px);
+    }
+    .event-card:hover, .coordinator-card:hover, .schedule-item:hover {
+      background: rgba(0,255,255,0.2);
+      transform: translateZ(15px) scale(1.03);
+      box-shadow: 0 0 20px rgba(0,255,255,0.2);
+    }
+    .event-title, .coordinator-name, .schedule-time { font-weight: bold; color: #fff; }
+    .event-desc, .schedule-desc { font-size: 0.9rem; opacity: 0.8; margin-top: 5px; }
+    .schedule-time { color: var(--primary-color); }
+
+    /* Register Section */
+    .register-section {
+      text-align: center;
+      padding: 60px 30px;
+      background: linear-gradient(135deg, rgba(15, 32, 39, 0.8), rgba(20, 40, 49, 0.9));
+      border-radius: 20px;
+      border: 2px solid var(--primary-color);
+      margin: 80px auto;
+      max-width: 900px;
+      box-shadow: 0 0 50px rgba(0,255,255,0.3);
+    }
+    .register-button {
+      display: inline-block;
+      padding: 18px 40px;
+      background: linear-gradient(45deg, var(--primary-color), #0099cc);
+      color: #000;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.2em;
+      border-radius: 50px;
+      margin-top: 25px;
+      box-shadow: 0 5px 25px rgba(0,255,255,0.4);
+      transition: all 0.3s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+    .register-button:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 10px 40px rgba(0,255,255,0.6);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      background: #0A1114;
+      border-top: 3px solid var(--primary-color);
+      margin-top: 60px;
+    }
+    .footer-socials a {
+        color: var(--primary-color);
+        margin: 0 15px;
+        font-size: 1.5rem;
+        transition: color 0.3s, transform 0.3s;
+    }
+    .footer-socials a:hover {
+        color: #fff;
+        transform: scale(1.2);
+    }
+
+    /* Scroll Reveal Animation */
+    .reveal {
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 1s ease-out, transform 1s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .reveal.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* Staggered animation for list items */
+    .reveal.show .event-card,
+    .reveal.show .coordinator-card,
+    .reveal.show .schedule-item {
+        animation: fadeInSlideUp 0.8s forwards cubic-bezier(0.23, 1, 0.32, 1);
+        opacity: 0;
+    }
+    @keyframes fadeInSlideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media(max-width:768px){
+      .section-grid{grid-template-columns:1fr;}
+      header h1 { font-size: clamp(1.8rem, 7vw, 2.5rem); }
+      header h2 { font-size: clamp(2rem, 8vw, 3rem); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="preloader">
+    <div class="loader"></div>
+    <p>INITIALIZING INFOVITZ 2K25...</p>
+</div>
+
+<canvas id="three-canvas"></canvas>
+<div class="scanline-overlay"></div>
+
+<div class="content-wrapper">
+  <header>
+    <h1>C.S.I. INSTITUTE OF TECHNOLOGY</h1>
+    <h2><span id="typewriter"></span><span class="typewriter-cursor"></span></h2>
+    <p>The Department of Information Technology Proudly Presents</p>
+    <p>A National Level Technical Symposium</p>
+  </header>
+
+  <div class="container">
+    <section class="countdown-timer reveal">
+      <h2><i class="fas fa-rocket"></i> Launch Countdown</h2>
+      <div class="countdown-display" id="countdown">
+        <div class="countdown-item"><div class="countdown-number" id="days">000</div><div class="countdown-label">Days</div></div>
+        <div class="countdown-item"><div class="countdown-number" id="hours">00</div><div class="countdown-label">Hours</div></div>
+        <div class="countdown-item"><div class="countdown-number" id="minutes">00</div><div class="countdown-label">Minutes</div></div>
+        <div class="countdown-item"><div class="countdown-number" id="seconds">00</div><div class="countdown-label">Seconds</div></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="section-grid">
+    <section class="section reveal" data-tilt>
+        <h2><i class="fas fa-info-circle"></i> About the Symposium</h2>
+        <p>INFOVITZ 2K25 is a confluence of brilliant minds, a platform for students to showcase their technical prowess, innovative ideas, and competitive spirit. Join us for a day of learning, competition, and networking.</p>
+    </section>
+
+    <section class="section reveal" data-tilt>
+        <h2><i class="fas fa-calendar-alt"></i> Event Details</h2>
+        <p><strong>Date:</strong> 10 October 2025</p>
+        <p><strong>Venue:</strong> Adv. Dharmaraj Auditorium</p>
+        <p><strong>Registration Fee:</strong> ₹200 (Includes Symposium Kit, Lunch & Certificate)</p>
+    </section>
+
+    <section class="section reveal" data-tilt>
+        <h2><i class="fas fa-calendar-day"></i> Event Schedule</h2>
+        <div class="schedule-item"><div class="schedule-time">09:00 AM</div><div class="schedule-desc">Inauguration</div></div>
+        <div class="schedule-item"><div class="schedule-time">10:00 AM</div><div class="schedule-desc">Technical & Non-Technical Events Start</div></div>
+        <div class="schedule-item"><div class="schedule-time">01:00 PM</div><div class="schedule-desc">Lunch Break</div></div>
+        <div class="schedule-item"><div class="schedule-time">04:00 PM</div><div class="schedule-desc">Valedictory & Prize Distribution</div></div>
+    </section>
+
+    <section class="section reveal" data-tilt>
+        <h2><i class="fas fa-laptop-code"></i> Technical Events</h2>
+        <div class="event-card"><div class="event-title">TechTalks (Paper Presentation)</div><div class="event-desc">Present your research papers on cutting-edge domains like AI, IoT, Blockchain, and more.</div></div>
+        <div class="event-card"><div class="event-title">BugHunt (Debugging)</div><div class="event-desc">An intense coding challenge to find and fix bugs in complex code snippets against the clock.</div></div>
+    </section>
+
+    <section class="section reveal" data-tilt>
+        <h2><i class="fas fa-gamepad"></i> Non-Technical Events</h2>
+        <div class="event-card"><div class="event-title">Dot2Dot</div><div class="event-desc">A creative puzzle-solving event that will test your logic and pattern recognition skills.</div></div>
+        <div class="event-card"><div class="event-title">StepSync</div><div class="event-desc">Unleash your energy in a vibrant group dancing competition. Show off your best moves!</div></div>
+        <div class="event-card"><div class="event-title">KvizStorm</div><div class="event-desc">The ultimate quiz covering tech, science, and pop culture. Form a team and conquer!</div></div>
+    </section>
+    
+    <section class="section reveal" data-tilt>
+        <h2><i class="fas fa-user-tie"></i> Head of Department</h2>
+        <div class="coordinator-card"><div class="coordinator-name">Dr. K. P. Ajitha Gladis</div></div>
+    </section>
+
+    <section class="section reveal" data-tilt>
+        <h2><i class="fas fa-users"></i> Staff Coordinators</h2>
+        <div class="coordinator-card"><div class="coordinator-name">Mrs. S. Asha Shibani</div></div>
+        <div class="coordinator-card"><div class="coordinator-name">Mrs. V. Richi</div></div>
+    </section>
+
+    <section class="section reveal" data-tilt>
+        <h2><i class="fas fa-user-friends"></i> Student Coordinators</h2>
+        <div class="coordinator-card"><div class="coordinator-name">J. P. Jeniba Prince</div></div>
+        <div class="coordinator-card"><div class="coordinator-name">J. Jebin Wilson</div></div>
+    </section>
+  </div>
+
+  <div class="container">
+    <div class="register-section reveal">
+      <h2><i class="fas fa-bullseye"></i> Ready to Join the Future?</h2>
+      <p>Be part of the most exciting technical symposium of 2025! Secure your spot now.</p>
+      <a class="register-button" href="https://docs.google.com/forms/d/e/1FAIpQLSc8M1A7vo_9v8BZqyQpgBpse92ByaI7ibertbg7rnRLxSG5pw/viewform" target="_blank">Register Now <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-socials">
+        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+    </div>
+    <p style="margin-top: 20px;">© 2025 INFOVITZ 2K25 | C.S.I. Institute of Technology</p>
+    <p style="margin-top: 10px; opacity: 0.7;">Innovate • Create • Inspire</p>
+  </footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- Preloader ---
+  const preloader = document.querySelector('.preloader');
+  window.addEventListener('load', () => {
+    preloader.classList.add('hidden');
+  });
+
+  // --- Typewriter Effect ---
+  const typewriterElement = document.getElementById('typewriter');
+  const textToType = "INFOVITZ 2K25";
+  let index = 0;
+  function type() {
+    if (index < textToType.length) {
+      typewriterElement.textContent += textToType.charAt(index);
+      index++;
+      setTimeout(type, 150);
+    }
+  }
+  type();
+
+  // --- Three.js Background ---
+  let scene, camera, renderer, stars;
+  const canvas = document.getElementById('three-canvas');
+
+  function initThreeJS() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.position.z = 5;
+    
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 5000;
+    const positions = new Float32Array(starCount * 3);
+
+    for (let i = 0; i < starCount * 3; i++) {
+        positions[i] = (Math.random() - 0.5) * 1000;
+    }
+    
+    starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    
+    let sprite = new THREE.TextureLoader().load('https://threejs.org/examples/textures/sprites/disc.png');
+    let starMaterial = new THREE.PointsMaterial({
+      color: 0xaaaaaa,
+      size: 0.7,
+      map: sprite,
+      transparent: true,
+      blending: THREE.AdditiveBlending
+    });
+
+    stars = new THREE.Points(starGeo, starMaterial);
+    scene.add(stars);
+
+    window.addEventListener('resize', onWindowResize, false);
+    document.addEventListener('mousemove', onMouseMove, false);
+
+    animate();
+  }
+
+  let mouseX = 0, mouseY = 0;
+  function onMouseMove(event) {
+    mouseX = event.clientX - window.innerWidth / 2;
+    mouseY = event.clientY - window.innerHeight / 2;
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    stars.rotation.y += 0.0001;
+
+    // Camera parallax effect
+    camera.position.x += (mouseX * 0.00001 - camera.position.x) * 0.05;
+    camera.position.y += (-mouseY * 0.00001 - camera.position.y) * 0.05;
+    camera.lookAt(scene.position);
+    
+    renderer.render(scene, camera);
+  }
+
+  function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+  
+  initThreeJS();
+
+  // --- Countdown Timer ---
+  const countdownInterval = setInterval(() => {
+    const eventDate = new Date('2025-10-10T09:00:00').getTime();
+    const now = new Date().getTime();
+    const distance = eventDate - now;
+
+    if (distance < 0) {
+      clearInterval(countdownInterval);
+      document.getElementById('countdown').innerHTML = '<h2 style="color:#00ffff;">The Event is LIVE!</h2>';
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % 1000) / 1000);
+
+    document.getElementById('days').textContent = days.toString().padStart(3, '0');
+    document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+    document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+    document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+  }, 1000);
+
+  // --- Scroll Reveal using Intersection Observer ---
+  const revealElements = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('show');
+        // Staggered animation for children
+        const items = entry.target.querySelectorAll('.event-card, .coordinator-card, .schedule-item');
+        items.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+        });
+      }
+    });
+  }, { threshold: 0.1 });
+
+  revealElements.forEach(el => observer.observe(el));
+
+
+  // --- 3D Tilt Effect for Cards ---
+  const tiltElements = document.querySelectorAll("[data-tilt]");
+  const tiltOptions = {
+    max: 15,     // max tilt rotation (degrees)
+    perspective: 1000, // Transform perspective, the lower the more extreme the tilt gets.
+    scale: 1.02,   // 2% increase
+    speed: 400,    // Speed of the enter/exit transition
+    glare: true,   // if it should have a glare effect
+    "max-glare": 0.2 // glare opacity
+  };
+
+  // Dynamically load Vanilla-tilt.js to avoid adding it to head
+  const tiltScript = document.createElement('script');
+  tiltScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js';
+  document.body.appendChild(tiltScript);
+  tiltScript.onload = () => {
+    VanillaTilt.init(tiltElements, tiltOptions);
+  }
+});
+</script>
+</body>
+</html>

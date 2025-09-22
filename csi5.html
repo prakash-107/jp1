@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>INFOVITZ 2K25 – Ultimate Tech Experience</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Exo 2', sans-serif;
+      background: #000;
+      color: #fff;
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+      cursor: none;
+    }
+
+    /* Custom Cursor */
+    .cursor {
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle, #00ffff, #ff00ff);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference;
+      transition: transform 0.1s ease;
+    }
+
+    .cursor-trail {
+      position: fixed;
+      width: 6px;
+      height: 6px;
+      background: #00ffff;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.7;
+    }
+
+    /* Matrix Digital Rain Background */
+    .matrix-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      background: linear-gradient(45deg, #000428, #004e92, #009ffd, #00d2ff);
+      background-size: 400% 400%;
+      animation: gradientWave 20s ease infinite;
+    }
+
+    @keyframes gradientWave {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .matrix-rain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .matrix-char {
+      position: absolute;
+      color: #00ff41;
+      font-family: 'Courier New', monospace;
+      font-size: 18px;
+      animation: matrixFall 3s linear infinite;
+      text-shadow: 0 0 10px #00ff41;
+      opacity: 0.7;
+    }
+
+    @keyframes matrixFall {
+      0% { transform: translateY(-100px); opacity: 1; }
+      100% { transform: translateY(100vh); opacity: 0; }
+    }
+
+    /* Floating Orbs */
+    .floating-orbs {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.2));
+      animation: orbFloat 8s ease-in-out infinite;
+      box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translateY(0px) translateX(0px) scale(1); }
+      33% { transform: translateY(-30px) translateX(20px) scale(1.1); }
+      66% { transform: translateY(20px) translateX(-15px) scale(0.9); }
+    }
+
+    /* 3D Canvas Background */
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    /* Holographic Navigation */
+    .nav-bar {
+      position: fixed;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+      backdrop-filter: blur(30px);
+      border: 2px solid transparent;
+      background-clip: padding-box;
+      border-radius: 50px;
+      padding: 20px 40px;
+      z-index: 1000;
+      display: flex;
+      gap: 30px;
+      transition: all 0.4s ease;
+      box-shadow: 0 0 50px rgba(0, 255, 255, 0.3), inset 0 0 50px rgba(255, 255, 255, 0.1);
+      animation: navFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes navFloat {
+      0%, 100% { transform: translateX(-50%) translateY(0px); }
+      50% { transform: translateX(-50%) translateY(-10px); }
+    }
+
+    .nav-bar::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ff00, #00ffff);
+      border-radius: 50px;
+      z-index: -1;
+      animation: borderRotate 4s linear infinite;
+    }
+
+    @keyframes borderRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .nav-item {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 12px 20px;
+      border-radius: 30px;
+      transition: all 0.3s ease;
+      font-size: 1em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.5s;
+    }
+
+    .nav-item:hover::before {
+      left: 100%;
+    }
+
+    .nav-item:hover {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(255, 0, 255, 0.3));
+      transform: scale(1.1) translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0, 255, 255, 0.5);
+      text-shadow: 0 0 20px #fff;
+    }
+
+    /* Main Content */
+    .content-wrapper {
+      position: relative;
+      z-index: 2;
+      padding-top: 120px;
+    }
+
+    /* Holographic Hero Section */
+    header {
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+      backdrop-filter: blur(30px);
+      padding: 100px 40px 80px;
+      text-align: center;
+      border: 3px solid transparent;
+      background-clip: padding-box;
+      border-radius: 40px;
+      margin: 40px;
+      box-shadow: 0 0 100px rgba(0, 255, 255, 0.4), inset 0 0 100px rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      animation: headerFloat 8s ease-in-out infinite;
+      transform-style: preserve-3d;
+    }
+
+    @keyframes headerFloat {
+      0%, 100% { transform: translateY(0px) rotateX(0deg); }
+      50% { transform: translateY(-20px) rotateX(2deg); }
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ff00, #ff0080, #8000ff, #00ffff);
+      border-radius: 40px;
+      z-index: -1;
+      animation: holoBorder 6s linear infinite;
+    }
+
+    @keyframes holoBorder {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.02); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse at center, rgba(0, 255, 255, 0.1), transparent 70%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.05); }
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #00ffff, #ff00ff, #ffff00);
+      background-size: 200% 200%;
+      animation: badgeShift 3s ease infinite;
+      color: #000;
+      padding: 15px 30px;
+      border-radius: 30px;
+      font-size: 1em;
+      font-weight: 800;
+      margin-bottom: 30px;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    @keyframes badgeShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    header h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: 5em;
+      font-weight: 900;
+      background: linear-gradient(45deg, #00ffff, #ffffff, #ff00ff, #ffff00, #00ffff);
+      background-size: 400% 400%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: textShimmer 4s ease infinite, textFloat 6s ease-in-out infinite, glitch 8s infinite;
+      margin: 30px 0;
+      text-shadow: 0 0 50px rgba(0, 255, 255, 0.8);
+      position: relative;
+      transform-style: preserve-3d;
+    }
+
+    @keyframes textShimmer {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes textFloat {
+      0%, 100% { transform: translateY(0px) rotateY(0deg); }
+      50% { transform: translateY(-15px) rotateY(5deg); }
+    }
+
+    @keyframes glitch {
+      0%, 90%, 100% { transform: translateX(0); }
+      91% { transform: translateX(-2px); }
+      92% { transform: translateX(2px); }
+      93% { transform: translateX(-2px); }
+      94% { transform: translateX(2px); }
+      95% { transform: translateX(0); }
+    }
+
+    header h2 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 4em;
+      font-weight: 700;
+      color: #fff;
+      margin: 40px 0;
+      text-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 60px rgba(0, 255, 255, 0.6);
+      animation: h2Glow 3s ease-in-out infinite alternate, h2Float 5s ease-in-out infinite;
+      position: relative;
+    }
+
+    @keyframes h2Glow {
+      from { text-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 60px rgba(0, 255, 255, 0.6); }
+      to { text-shadow: 0 0 40px rgba(255, 255, 255, 1), 0 0 80px rgba(0, 255, 255, 0.8), 0 0 120px rgba(255, 0, 255, 0.6); }
+    }
+
+    @keyframes h2Float {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-10px) scale(1.02); }
+    }
+
+    header h2::before, header h2::after {
+      content: '⚡';
+      position: absolute;
+      font-size: 0.6em;
+      animation: lightning 2s ease-in-out infinite;
+    }
+
+    header h2::before {
+      left: -100px;
+      animation-delay: 0s;
+    }
+
+    header h2::after {
+      right: -100px;
+      animation-delay: 1s;
+    }
+
+    @keyframes lightning {
+      0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.7; }
+      50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+    }
+
+    header p {
+      font-size: 1.6em;
+      margin: 20px 0;
+      opacity: 0.9;
+      font-weight: 400;
+      animation: textGlow 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes textGlow {
+      from { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+      to { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.4); }
+    }
+
+    /* Holographic Countdown */
+    .countdown-container {
+      max-width: 1400px;
+      margin: 80px auto;
+      padding: 60px 40px;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+      backdrop-filter: blur(30px);
+      border-radius: 50px;
+      border: 4px solid transparent;
+      background-clip: padding-box;
+      box-shadow: 0 0 100px rgba(0, 255, 255, 0.5), inset 0 0 100px rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      animation: containerLevitate 10s ease-in-out infinite;
+      transform-style: preserve-3d;
+    }
+
+    @keyframes containerLevitate {
+      0%, 100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+      33% { transform: translateY(-20px) rotateX(2deg) rotateY(1deg); }
+      66% { transform: translateY(-10px) rotateX(-1deg) rotateY(-1deg); }
+    }
+
+    .countdown-container::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ff00, #ff0080, #8000ff, #00ffff);
+      border-radius: 50px;
+      z-index: -1;
+      animation: holoRotate 8s linear infinite;
+    }
+
+    @keyframes holoRotate {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.01); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+
+    .countdown-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 4em;
+      font-weight: 900;
+      background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ffff);
+      background-size: 300% 300%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: titleWave 4s ease infinite, titleFloat 6s ease-in-out infinite;
+      margin-bottom: 50px;
+      text-shadow: 0 0 50px rgba(0, 255, 255, 0.8);
+    }
+
+    @keyframes titleWave {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes titleFloat {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-15px) scale(1.05); }
+    }
+
+    .countdown-subtitle {
+      font-size: 1.5em;
+      color: #fff;
+      margin-bottom: 50px;
+      opacity: 0.9;
+      font-weight: 500;
+      animation: subtitleGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes subtitleGlow {
+      from { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+      to { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.4); }
+    }
+
+    .countdown-display {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 40px;
+      margin: 60px 0;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .time-unit {
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+      backdrop-filter: blur(20px);
+      border: 3px solid transparent;
+      background-clip: padding-box;
+      border-radius: 30px;
+      padding: 40px 30px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s ease;
+      animation: unitLevitate 6s ease-in-out infinite;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+
+    .time-unit:nth-child(1) { animation-delay: 0s; }
+    .time-unit:nth-child(2) { animation-delay: 0.5s; }
+    .time-unit:nth-child(3) { animation-delay: 1s; }
+    .time-unit:nth-child(4) { animation-delay: 1.5s; }
+
+    @keyframes unitLevitate {
+      0%, 100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+      50% { transform: translateY(-15px) rotateX(5deg) rotateY(2deg); }
+    }
+
+    .time-unit::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ff00, #00ffff);
+      border-radius: 30px;
+      z-index: -1;
+      animation: unitBorder 4s linear infinite;
+    }
+
+    @keyframes unitBorder {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .time-unit:hover {
+      transform: translateY(-25px) scale(1.1) rotateX(10deg) rotateY(5deg);
+      box-shadow: 0 30px 60px rgba(0, 255, 255, 0.6);
+    }
+
+    .time-number {
+      font-family: 'Orbitron', monospace;
+      font-size: 4.5em;
+      font-weight: 900;
+      background: linear-gradient(45deg, #00ffff, #ffffff, #ff00ff);
+      background-size: 200% 200%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: numberShimmer 3s ease infinite, numberPulse 2s ease-in-out infinite alternate;
+      display: block;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+    }
+
+    @keyframes numberShimmer {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes numberPulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
+    }
+
+    .time-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.3em;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-top: 20px;
+      position: relative;
+      z-index: 1;
+      font-weight: 600;
+      animation: labelGlow 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes labelGlow {
+      from { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+      to { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.4); }
+    }
+
+    /* Holographic Sections */
+    section {
+      max-width: 1200px;
+      margin: 60px auto;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+      backdrop-filter: blur(30px);
+      padding: 50px;
+      border-radius: 40px;
+      border: 3px solid transparent;
+      background-clip: padding-box;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s ease;
+      box-shadow: 0 0 50px rgba(0, 255, 255, 0.3), inset 0 0 50px rgba(255, 255, 255, 0.1);
+      animation: sectionFloat 8s ease-in-out infinite;
+      transform-style: preserve-3d;
+    }
+
+    @keyframes sectionFloat {
+      0%, 100% { transform: translateY(0px) rotateX(0deg); }
+      50% { transform: translateY(-10px) rotateX(1deg); }
+    }
+
+    section::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ff00, #00ffff);
+      border-radius: 40px;
+      z-index: -1;
+      animation: sectionBorder 6s linear infinite;
+    }
+
+    @keyframes sectionBorder {
+      0% { transform: rotate(0deg) scale(1); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+
+    section:hover {
+      transform: translateY(-20px) scale(1.02) rotateX(3deg) rotateY(2deg);
+      box-shadow: 0 40px 80px rgba(0, 255, 255, 0.5);
+    }
+
+    h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: 3em;
+      font-weight: 700;
+      background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ffff);
+      background-size: 300% 300%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: h2Shimmer 4s ease infinite, h2Float 5s ease-in-out infinite;
+      margin-bottom: 40px;
+      position: relative;
+      text-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+    }
+
+    @keyframes h2Shimmer {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Holographic Lists */
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    ul li {
+      margin: 30px 0;
+      padding: 30px 40px;
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+      border-radius: 25px;
+      border-left: 6px solid #00ffff;
+      position: relative;
+      transition: all 0.5s ease;
+      backdrop-filter: blur(15px);
+      animation: liFloat 6s ease-in-out infinite;
+      transform-style: preserve-3d;
+    }
+
+    @keyframes liFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+
+    ul li:hover {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.4));
+      transform: translateX(20px) scale(1.03) rotateY(2deg);
+      box-shadow: 0 20px 40px rgba(0, 255, 255, 0.4);
+    }
+
+    ul li::before {
+      content: "⚡";
+      position: absolute;
+      left: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2em;
+      animation: sparkle 3s ease-in-out infinite;
+      background: linear-gradient(45deg, #00ffff, #ff00ff);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+    }
+
+    @keyframes sparkle {
+      0%, 100% { transform: translateY(-50%) scale(1) rotate(0deg); }
+      50% { transform: translateY(-50%) scale(1.3) rotate(180deg); }
+    }
+
+    /* Ultimate Register Button */
+    .register-button {
+      display: inline-block;
+      padding: 25px 60px;
+      background: linear-gradient(135deg, #00ffff, #ff00ff, #ffff00, #00ff00);
+      background-size: 400% 400%;
+      color: #000;
+      text-decoration: none;
+      font-weight: 900;
+      font-family: 'Orbitron', monospace;
+      border-radius: 50px;
+      margin: 50px auto;
+      transition: all 0.5s ease;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      box-shadow: 0 20px 50px rgba(0, 255, 255, 0.6);
+      position: relative;
+      overflow: hidden;
+      font-size: 1.4em;
+      animation: buttonFloat 4s ease-in-out infinite, buttonShimmer 3s ease infinite;
+      transform-style: preserve-3d;
+    }
+
+    @keyframes buttonFloat {
+      0%, 100% { transform: translateY(0px) rotateX(0deg); }
+      50% { transform: translateY(-10px) rotateX(5deg); }
+    }
+
+    @keyframes buttonShimmer {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .register-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+      transition: left 0.6s;
+    }
+
+    .register-button:hover::before {
+      left: 100%;
+    }
+
+    .register-button:hover {
+      transform: translateY(-15px) scale(1.1) rotateX(10deg) rotateY(5deg);
+      box-shadow: 0 40px 80px rgba(0, 255, 255, 0.8);
+    }
+
+    .register-section {
+      text-align: center;
+      padding: 80px 50px;
+    }
+
+    /* Holographic Footer */
+    footer {
+      text-align: center;
+      padding: 60px;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 255, 255, 0.1));
+      backdrop-filter: blur(30px);
+      border-top: 4px solid transparent;
+      background-clip: padding-box;
+      margin-top: 80px;
+      position: relative;
+      box-shadow: 0 0 50px rgba(0, 255, 255, 0.3);
+    }
+
+    footer::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #00ffff, #ff00ff, #ffff00, #00ff00, #00ffff);
+      animation: footerGlow 4s linear infinite;
+    }
+
+    @keyframes footerGlow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .nav-bar { 
+        flex-direction: column; 
+        gap: 20px; 
+        padding: 30px;
+        top: 20px;
+      }
+      
+      header h1 { font-size: 3.5em; }
+      header h2 { font-size: 2.8em; }
+      
+      .countdown-display { 
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px; 
+      }
+      
+      .time-unit { 
+        padding: 30px 25px; 
+      }
+      
+      .time-number { font-size: 3.5em; }
+      .countdown-title { font-size: 3em; }
+      
+      section { 
+        margin: 30px 20px; 
+        padding: 40px 30px; 
+      }
+      
+      .content-wrapper { padding-top: 180px; }
+    }
+
+    @media (max-width: 480px) {
+      .countdown-display { 
+        grid-template-columns: 1fr 1fr;
+        gap: 20px; 
+      }
+      
+      .time-number { font-size: 3em; }
+      header h1 { font-size: 2.8em; }
+      header h2 { font-size: 2.2em; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor"></div>
+
+<!-- Matrix Background -->
+<div class="matrix-bg"></div>
+<div class="matrix-rain" id="matrixRain"></div>
+
+<!-- Floating Orbs -->
+<div class="floating-orbs" id="floatingOrbs"></div>
+
+<!-- 3D Background Canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Holographic Navigation -->
+<nav class="nav-bar">
+  <a href="#home" class="nav-item">🏠 Home</a>
+  <a href="#countdown" class="nav-item">⏰ Countdown</a>
+  <a href="#events" class="nav-item">🎯 Events</a>
+  <a href="#team" class="nav-item">👥 Team</a>
+  <a href="#register" class="nav-item">📝 Register</a>
+</nav>
+
+<div class="content-wrapper">
+  <header id="home">
+    <div class="hero-badge">🚀 ULTIMATE TECH EXPERIENCE 🚀</div>
+    <h1>C.S.I. INSTITUTE OF TECHNOLOGY</h1>
+    <h2>INFOVITZ 2K25</h2>
+    <p>A Mind-Blowing National Level Technical Symposium</p>
+    <p><strong>Department of Information Technology</strong></p>
+  </header>
+
+  <!-- Ultimate Countdown Timer -->
+  <div class="countdown-container" id="countdown">
+    <h2 class="countdown-title">🌟 ULTIMATE COUNTDOWN 🌟</h2>
+    <p class="countdown-subtitle">✨ Prepare for the most incredible tech adventure ever! ✨</p>
+    <div class="countdown-display" id="countdownDisplay">
+      <div class="time-unit">
+        <span class="time-number" id="days">00</span>
+        <span class="time-label">Days</span>
+      </div>
+      <div class="time-unit">
+        <span class="time-number" id="hours">00</span>
+        <span class="time-label">Hours</span>
+      </div>
+      <div class="time-unit">
+        <span class="time-number" id="minutes">00</span>
+        <span class="time-label">Minutes</span>
+      </div>
+      <div class="time-unit">
+        <span class="time-number" id="seconds">00</span>
+        <span class="time-label">Seconds</span>
+      </div>
+    </div>
+    <p style="font-family: 'Orbitron', monospace; font-size: 1.6em; color: #fff; margin-top: 40px;">
+      📅 October 10, 2025 • ⏰ 9:00 AM
+    </p>
+  </div>
+
+  <section>
+    <h2>📅 Event Details</h2>
+    <p><strong>📍 Date:</strong> October 10, 2025</p>
+    <p><strong>🏛️ Venue:</strong> Adv. Dharmaraj Auditorium</p>
+    <p><strong>💰 Registration Fee:</strong> ₹200 (Includes lunch)</p>
+  </section>
+
+  <section id="events">
+    <h2>🔧 Technical Events</h2>
+    <ul>
+      <li><strong>TechTalks:</strong> Share your revolutionary research and groundbreaking ideas with industry legends! 🎤</li>
+      <li><strong>BugHunt:</strong> The ultimate debugging challenge with mind-bending programming puzzles! 🐛</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🎭 Non-Technical Events</h2>
+    <ul>
+      <li><strong>Dot2Dot:</strong> Mind-melting puzzle-solving with creative genius twists! 🧩</li>
+      <li><strong>StepSync:</strong> Explosive group dancing competition that'll blow your mind! 💃</li>
+      <li><strong>KvizStorm:</strong> The ultimate knowledge championship battle! 🧠</li>
+    </ul>
+  </section>
+
+  <section id="team">
+    <h2>👥 Head of the Department</h2>
+    <p><strong>Dr. K. P. Ajitha Gladis</strong> 🌟</p>
+  </section>
+
+  <section>
+    <h2>👥 Staff Coordinators</h2>
+    <ul>
+      <li><strong>Mrs. S. Asha Shibani</strong> ✨</li>
+      <li><strong>Mrs. V. Richi</strong> ✨</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>👥 Student Coordinators</h2>
+    <ul>
+      <li><strong>J. P. Jeniba Prince</strong> 🌸</li>
+      <li><strong>J. Jebin Wilson</strong> 🌸</li>
+    </ul>
+  </section>
+
+  <section class="register-section" id="register">
+    <a class="register-button" href="https://docs.google.com/forms/d/e/1FAIpQLSc8M1A7vo_9v8BZqyQpgBpse92ByaI7ibertbg7rnRLxSG5pw/viewform?usp=sharing" target="_blank" rel="noopener noreferrer">🚀 REGISTER NOW! 🚀</a>
+  </section>
+
+  <footer>
+    <p>© 2025 INFOVITZ 2K25 | C.S.I. Institute of Technology</p>
+    <p style="margin-top: 20px; opacity: 0.8;">✨ Powered by Innovation, Dreams & Future Technology ✨</p>
+  </footer>
+</div>
+
+<script>
+// Custom Cursor
+const cursor = document.getElementById('cursor');
+const cursorTrails = [];
+
+// Create cursor trails
+for (let i = 0; i < 10; i++) {
+  const trail = document.createElement('div');
+  trail.className = 'cursor-trail';
+  document.body.appendChild(trail);
+  cursorTrails.push(trail);
+}
+
+let mouseX = 0, mouseY = 0;
+let trailX = [], trailY = [];
+
+for (let i = 0; i < 10; i++) {
+  trailX[i] = 0;
+  trailY[i] = 0;
+}
+
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+function updateCursor() {
+  cursor.style.left = mouseX + 'px';
+  cursor.style.top = mouseY + 'px';
+  
+  trailX[0] = mouseX;
+  trailY[0] = mouseY;
+  
+  for (let i = 1; i < 10; i++) {
+    trailX[i] += (trailX[i-1] - trailX[i]) * 0.3;
+    trailY[i] += (trailY[i-1] - trailY[i]) * 0.3;
+    
+    cursorTrails[i].style.left = trailX[i] + 'px';
+    cursorTrails[i].style.top = trailY[i] + 'px';
+    cursorTrails[i].style.opacity = (10 - i) / 10;
+  }
+  
+  requestAnimationFrame(updateCursor);
+}
+updateCursor();
+
+// Matrix Digital Rain
+function createMatrixRain() {
+  const matrixContainer = document.getElementById('matrixRain');
+  const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+  
+  for (let i = 0; i < 50; i++) {
+    const char = document.createElement('div');
+    char.className = 'matrix-char';
+    char.textContent = chars[Math.floor(Math.random() * chars.length)];
+    char.style.left = Math.random() * 100 + '%';
+    char.style.animationDelay = Math.random() * 3 + 's';
+    char.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    matrixContainer.appendChild(char);
+  }
+}
+
+// Create Floating Orbs
+function createFloatingOrbs() {
+  const orbContainer = document.getElementById('floatingOrbs');
+  
+  for (let i = 0; i < 15; i++) {
+    const orb = document.createElement('div');
+    orb.className = 'orb';
+    const size = Math.random() * 100 + 50;
+    orb.style.width = size + 'px';
+    orb.style.height = size + 'px';
+    orb.style.left = Math.random() * 100 + '%';
+    orb.style.top = Math.random() * 100 + '%';
+    orb.style.animationDelay = Math.random() * 8 + 's';
+    orb.style.animationDuration = (Math.random() * 4 + 6) + 's';
+    orbContainer.appendChild(orb);
+  }
+}
+
+// Three.js Ultimate 3D Background
+let scene, camera, renderer, particles, geometry, material;
+
+function init3DBackground() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  // Ultimate particle system
+  const particleCount = 2000;
+  const positions = new Float32Array(particleCount * 3);
+  const colors = new Float32Array(particleCount * 3);
+  const sizes = new Float32Array(particleCount);
+
+  for (let i = 0; i < particleCount * 3; i += 3) {
+    positions[i] = (Math.random() - 0.5) * 4000;
+    positions[i + 1] = (Math.random() - 0.5) * 4000;
+    positions[i + 2] = (Math.random() - 0.5) * 4000;
+
+    // Holographic colors
+    const colorChoice = Math.random();
+    if (colorChoice < 0.25) {
+      colors[i] = 0; colors[i + 1] = 1; colors[i + 2] = 1; // Cyan
+    } else if (colorChoice < 0.5) {
+      colors[i] = 1; colors[i + 1] = 0; colors[i + 2] = 1; // Magenta
+    } else if (colorChoice < 0.75) {
+      colors[i] = 1; colors[i + 1] = 1; colors[i + 2] = 0; // Yellow
+    } else {
+      colors[i] = 1; colors[i + 1] = 1; colors[i + 2] = 1; // White
+    }
+    
+    sizes[i / 3] = Math.random() * 10 + 2;
+  }
+
+  geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+  material = new THREE.PointsMaterial({
+    size: 8,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.8,
+    sizeAttenuation: true
+  });
+
+  particles = new THREE.Points(geometry, material);
+  scene.add(particles);
+
+  camera.position.z = 1500;
+}
+
+function animate3D() {
+  requestAnimationFrame(animate3D);
+  
+  // Mouse interaction
+  particles.rotation.x += (mouseY * 0.00001);
+  particles.rotation.y += (mouseX * 0.00001);
+  
+  // Auto rotation
+  particles.rotation.x += 0.0008;
+  particles.rotation.y += 0.0012;
+  
+  renderer.render(scene, camera);
+}
+
+// Ultimate Countdown Timer
+function updateCountdown() {
+  const eventDate = new Date('October 10, 2025 09:00:00').getTime();
+  const now = new Date().getTime();
+  const distance = eventDate - now;
+
+  if (distance > 0) {
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById('days').textContent = days.toString().padStart(2, '0');
+    document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+    document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+    document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+  } else {
+    document.getElementById('countdownDisplay').innerHTML = '<div class="time-unit" style="grid-column: 1/-1;"><span class="time-number">🎉 THE FUTURE IS NOW! 🎉</span></div>';
+  }
+}
+
+// Smooth scrolling for navigation
+function setupSmoothScrolling() {
+  document.querySelectorAll('.nav-item').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = link.getAttribute('href').substring(1);
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+}
+
+// Handle window resize
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// Initialize everything
+window.addEventListener('load', () => {
+  init3DBackground();
+  animate3D();
+  createMatrixRain();
+  createFloatingOrbs();
+  updateCountdown();
+  setupSmoothScrolling();
+  setInterval(updateCountdown, 1000);
+});
+
+window.addEventListener('resize', onWindowResize);
+
+// Add click ripple effects
+document.addEventListener('click', (e) => {
+  const ripple = document.createElement('div');
+  ripple.style.position = 'fixed';
+  ripple.style.left = e.clientX + 'px';
+  ripple.style.top = e.clientY + 'px';
+  ripple.style.width = '0px';
+  ripple.style.height = '0px';
+  ripple.style.background = 'radial-gradient(circle, rgba(0,255,255,0.6), transparent)';
+  ripple.style.borderRadius = '50%';
+  ripple.style.pointerEvents = 'none';
+  ripple.style.zIndex = '9999';
+  ripple.style.animation = 'ripple 0.6s ease-out';
+  document.body.appendChild(ripple);
+  
+  setTimeout(() => {
+    ripple.remove();
+  }, 600);
+});
+
+// Add ripple animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes ripple {
+    0% { width: 0px; height: 0px; opacity: 1; }
+    100% { width: 300px; height: 300px; opacity: 0; transform: translate(-150px, -150px); }
+  }
+`;
+document.head.appendChild(style);
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9822ad2900a44e78',t:'MTc1ODM4NTUwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
